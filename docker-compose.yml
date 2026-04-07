@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  ctf-app:
+    build: .
+    container_name: ctf_phase_one
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    restart: unless-stopped
