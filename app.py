@@ -167,7 +167,7 @@ def level3():
             if any('admin' in str(x) for x in data):
                 output += "<br>FLAG:SUVFRXs1dDRnM18wNF9IMzRkM3JfQzAwazEzXzRidTUzfQ== → got to /hidden_area"
 
-    return page("LEVEL 3", f"<form method='POST'><input name='keyword'><button>search</button></form><div>{output}</div>")
+    return page("LEVEL 3", f"<form method='POST'><input name='keyword'><button>search</button></form><div>{output}<p>Hint: Can you find the database.?</p></div>")
 
 # =============================
 # STAGE 4 
