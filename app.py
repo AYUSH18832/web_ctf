@@ -91,6 +91,7 @@ def login():
             session['user'] = u
             return page("AUTH", """
             <p>Access anomaly.</p>
+            <p>Welcome Guest!</p>
             <!-- next_ref=shadow_gate_v2 -->
             <p class='hint'>Layers of decoding reveal truth.</p>
             <p>FLAG:SSUVFRXs1dDRnM18wMV80dTdoX0J5cDQ1NX0= [Can't read flag,Look for hint look into code.]<!--Do you know base64?--></p>
@@ -100,9 +101,10 @@ def login():
             return page("AUTH", "<p>Denied</p>")
 
     return page("AUTH", """
+    <p class='hint'>Can you login as guest?</p>
     <form method='POST'>
-        <input name='username'>
-        <input name='password'>
+        <input placeholder="Enter your name" name='username'>
+        <input placeholder="Enter your password" name='password'>
         <button>enter</button>
     </form>
     <p class='hint'>Sometimes one decode isn’t enough.</p>
