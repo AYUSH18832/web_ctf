@@ -141,7 +141,7 @@ def admin_v5():
         return page("ADMIN", """
         <p>Privileged access granted.</p>
         <p class='hint'>You became what you sent.</p>
-        <p>FLAG:SUVFRXs1dDRnM18wM181UUwxX0NoNDFufQ==</p>
+        <p>FLAG:SUVFRXs1dDRnM18wMl80Y2MzNTVfQzBuN3IwbH0=</p>
         <a href='/level3'>next</a>
         """)
 
