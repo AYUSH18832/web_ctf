@@ -94,7 +94,7 @@ def login():
             <p>Welcome Guest!</p>
             <!-- next_ref=shadow_gate_v2 -->
             <p class='hint'>Layers of decoding reveal truth.</p>
-            <p>FLAG:SSUVFRXs1dDRnM18wMV80dTdoX0J5cDQ1NX0= [Can't read flag,Look for hint look into code.]<!--Do you know base64?--></p>
+            <p>FLAG:SUVFRXs1dDRnM18wMV80dTdoX0J5cDQ1NX0= [Can't read flag,Look for hint look into code.]<!--Do you know base64?--></p>
             <a href='/level2?ref=shadow_gate_v2'>continue</a>
             """)
         else:
