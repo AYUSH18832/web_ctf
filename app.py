@@ -6,7 +6,11 @@ app = Flask(__name__)
 app.secret_key = "weaksecret"
 
 TITLE = "TEST RUN FOR CTF PHASE 1"
-S5_FINAL = "SUVFRXtQaDQ1M18wMV9DMG1wbDM3M2RfTTQ1NzNyfQ=="
+S1_FLAG = "IEEE{5t4g3_01_4u7h_Byp455}"
+S2_FLAG = "IEEE{5t4g3_02_4cc355_C0n7r0l}"
+S3_FLAG = "IEEE{5t4g3_03_5QL1_Ch41n}"
+S4_FLAG = "IEEE{5t4g3_04_H34d3r_C00k13_4bu53}"
+S5_FLAG = "IEEE{Ph453_01_C0mpl373d_M4573r}"
 
 # =============================
 # DB INIT
@@ -89,12 +93,10 @@ def login():
 
         if res:
             session['user'] = u
-            return page("AUTH", """
+            return page("AUTH", f"""
             <p>Access anomaly.</p>
             <p>Welcome Guest!</p>
-            <!-- next_ref=shadow_gate_v2 -->
-            <p class='hint'>Layers of decoding reveal truth.</p>
-            <p>FLAG:SUVFRXs1dDRnM18wMV80dTdoX0J5cDQ1NX0= [Can't read flag,Look for hint look into code.]<!--Do you know base64?--></p>
+            <p>FLAG:{S1_FLAG}</p>
             <a href='/level2?ref=shadow_gate_v2'>continue</a>
             """)
         else:
@@ -138,10 +140,10 @@ Disallow: /admin_v5
 def admin_v5():
     # require special header instead of direct access
     if request.headers.get('X-Role') == 'admin':
-        return page("ADMIN", """
+        return page("ADMIN", f"""
         <p>Privileged access granted.</p>
         <p class='hint'>You became what you sent.</p>
-        <p>FLAG:SUVFRXs1dDRnM18wMl80Y2MzNTVfQzBuN3IwbH0=</p>
+        <p>FLAG:{S2_FLAG}</p>
         <a href='/level3'>next</a>
         """)
 
@@ -156,19 +158,33 @@ def level3():
     output = ""
     if request.method == 'POST':
         k = request.form.get('keyword','')
-        if "admin" in k.lower():
+
+        # ✅ Prevent empty input bypass
+        if not k.strip():
+            output = "Empty input not allowed"
+
+        elif "admin" in k.lower():
             output = "Blocked"
+
         else:
             conn = sqlite3.connect("database.db")
             c = conn.cursor()
             query = f"SELECT username FROM users WHERE username LIKE '%{k}%'"
             data = c.execute(query).fetchall()
             output = str(data)
+
             if any('admin' in str(x) for x in data):
-                output += "<br>FLAG:SUVFRXs1dDRnM18wNF9IMzRkM3JfQzAwazEzXzRidTUzfQ== → got to /hidden_area"
+                output += f"<br>FLAG: {S3_FLAG} → go to /hidden_area"
 
-    return page("LEVEL 3", f"<form method='POST'><input name='keyword'><button>search</button></form><div>{output}<p>Hint: Can you find the database.?</p></div>")
-
+    return page("LEVEL 3", f"""
+    <form method='POST'>
+        <input name='keyword'>
+        <button>search</button>
+    </form>
+    <div>{output}
+    <p>Hint: Can you find the database.?</p>
+    </div>
+    """)
 # =============================
 # STAGE 4 
 # =============================
@@ -177,7 +193,7 @@ def level3():
 def hidden_area():
     token = request.headers.get('X-Access','') or request.cookies.get('access','')
     if token == 'granted':
-        return page("HIDDEN", "<p>FLAG:SUVFRXs1dDRnM18wNF9IMzRkM3JfQzAwazEzXzRidTUzfQ==</p><p>Hint: Look for the hidden configuration file for final flag</p> <!-- Look for /debug_config  Its easy.-->")
+        return page("HIDDEN", f"<p>FLAG: {S4_FLAG}</p><p>Hint: Look for the hidden configuration file for final flag</p> <!-- Look for /debug_config  Its easy.-->")
     resp = make_response(page("HIDDEN", "Denied"))
     resp.set_cookie('access','denied')
     return resp
