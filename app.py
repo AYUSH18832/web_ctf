@@ -311,50 +311,71 @@ GLOBAL_CSS = """
   .btn-ghost:hover { background: #ffffff08; }
 
   /* ---- HINT PANEL ---- */
-  .hint-toggle {
-    cursor: pointer;
-    user-select: none;
+  .hint-panel {
+    margin-top: 1.4rem;
+    background: var(--bg3);
+    border: 1px solid #ffb80033;
+    border-left: 3px solid var(--amber);
+    border-radius: 1px;
+    overflow: hidden;
   }
 
-  .hint-box {
-    display: none;
-    margin-top: 1rem;
-    background: var(--bg3);
-    border: 1px solid #ffb80044;
-    padding: 1rem 1.2rem;
-    border-left: 3px solid var(--amber);
+  .hint-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid #ffb80022;
+  }
+
+  .hint-panel-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.28em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+
+  .hint-lvl-btns { display: flex; gap: 0.4rem; }
+
+  .hint-lvl-btn {
+    background: transparent;
+    border: 1px solid #ffb80055;
+    color: var(--text-mute);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.18s;
     border-radius: 1px;
   }
 
-  .hint-box.open { display: block; }
+  .hint-lvl-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .hint-lvl-btn.hint-btn-active { background: #ffb80022; border-color: var(--amber); color: var(--amber); }
 
-  .hint-box .hint-title {
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
+  .hint-row {
+    display: none;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid #ffb80011;
+  }
+
+  .hint-level-badge {
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
     color: var(--amber);
     text-transform: uppercase;
-    margin-bottom: 0.6rem;
+    white-space: nowrap;
+    padding-top: 0.1rem;
+    min-width: 110px;
   }
 
-  .hint-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  .hint-list li {
-    font-size: 0.82rem;
+  .hint-text {
+    font-size: 0.8rem;
     color: var(--text-dim);
-    padding: 0.25rem 0;
-    padding-left: 1.2rem;
-    position: relative;
-    line-height: 1.6;
-  }
-
-  .hint-list li::before {
-    content: '>';
-    position: absolute;
-    left: 0;
-    color: var(--amber);
+    line-height: 1.65;
   }
 
   /* ---- FLAG DISPLAY ---- */
@@ -561,22 +582,43 @@ GLOBAL_CSS = """
 
 HINT_JS = """
 <script>
-function toggleHint(id) {
-  var el = document.getElementById(id);
-  el.classList.toggle('open');
-  var btn = el.previousElementSibling;
-  btn.textContent = el.classList.contains('open') ? '[ - ] hide hints' : '[ ? ] show hints';
+function revealHint(stageId, level) {
+  for (var i = 1; i <= level; i++) {
+    var el = document.getElementById(stageId + '-h' + i);
+    if (el) el.style.display = 'flex';
+  }
+  for (var j = 1; j <= 3; j++) {
+    var btn = document.getElementById(stageId + '-btn' + j);
+    if (btn) btn.classList.remove('hint-btn-active');
+  }
+  var active = document.getElementById(stageId + '-btn' + level);
+  if (active) active.classList.add('hint-btn-active');
 }
 </script>
 """
 
 def hint_block(hints, block_id="hint-panel"):
-    items = "".join(f"<li>{h}</li>" for h in hints)
+    """hints: list of exactly 3 strings — Lvl1 concept, Lvl2 direction, Lvl3 nudge (NO answers/payloads)."""
+    rows = ""
+    icons = ["&#9650;", "&#9654;&#9654;", "&#9888;"]
+    labels = ["Lvl 1 — Concept", "Lvl 2 — Direction", "Lvl 3 — Nudge"]
+    for i, (hint, icon, label) in enumerate(zip(hints, icons, labels), 1):
+        rows += f"""
+        <div id="{block_id}-h{i}" class="hint-row" style="display:none;">
+          <span class="hint-level-badge">{label}</span>
+          <span class="hint-text">{hint}</span>
+        </div>"""
+    btns = "".join(
+        f'<button id="{block_id}-btn{i}" type="button" class="hint-lvl-btn" onclick="revealHint(\'{block_id}\',{i})">H{i}</button>'
+        for i in range(1, 4)
+    )
     return f"""
-    <button type="button" class="btn btn-ghost hint-toggle" onclick="toggleHint('{block_id}')">[ ? ] show hints</button>
-    <div class="hint-box" id="{block_id}">
-      <div class="hint-title">// hints</div>
-      <ul class="hint-list">{items}</ul>
+    <div class="hint-panel">
+      <div class="hint-panel-header">
+        <span class="hint-panel-label">// hint system</span>
+        <div class="hint-lvl-btns">{btns}</div>
+      </div>
+      {rows}
     </div>
     """
 
@@ -607,6 +649,7 @@ def page(stage_label, body, show_nav=True):
           <a href="/level2?ref=shadow_gate_v2">Stage 02</a>
           <a href="/level3">Stage 03</a>
           <a href="/hidden_area">Stage 04</a>
+          <a href="/level5">Stage 05</a>
         </nav>"""
 
     return f"""<!DOCTYPE html>
@@ -710,7 +753,7 @@ def rules():
         <li><strong>Stage 02</strong> — Access control via hidden endpoints &amp; custom headers</li>
         <li><strong>Stage 03</strong> — Second-order SQL injection / LIKE clause injection</li>
         <li><strong>Stage 04</strong> — Header &amp; cookie manipulation</li>
-        <li><strong>Stage 05</strong> — Debug endpoint / information disclosure</li>
+        <li><strong>Stage 05</strong> — Source inspection / information disclosure via exposed debug endpoint</li>
       </ul>
     </div>
 
@@ -791,12 +834,10 @@ def login():
               </div>
             </form>
             {hint_block([
-                "The login form filters single quotes ( ' ) in the raw input.",
-                "HTTP form data can be URL-encoded. What happens if you encode a quote as <code>%27</code>?",
-                "The server decodes the input <em>after</em> checking. Try double-encoding: <code>%2527</code> → decoded once → <code>%27</code> → decoded again → <code>'</code>.",
-                "Classic SQL injection: try username <code>admin'--</code> (encoded) to comment out the password check.",
-                "Or use a condition like <code>' OR '1'='1</code> in the password field (properly encoded)."
-            ])}
+                "Input validation that runs before transformation is not the same as sanitization. The check and the use happen at different stages.",
+                "Characters that get blocked in raw form may have alternate representations in different encoding schemes.",
+                "SQL queries built by joining strings together can be restructured if you can control where quotes appear — think about how SQL parses string boundaries."
+            ], "hint1a")}
             """
             return page("Stage 01", body)
 
@@ -820,12 +861,10 @@ def login():
       </div>
     </form>
     {hint_block([
-        "The login form filters single quotes ( ' ) in the raw input.",
-        "HTTP form data can be URL-encoded. What happens if you encode a quote as <code>%27</code>?",
-        "The server decodes the input <em>after</em> checking. Try double-encoding: <code>%2527</code> → decoded once → <code>%27</code> → decoded again → <code>'</code>.",
-        "Classic SQL injection: try username <code>admin'--</code> (encoded) to comment out the password check.",
-        "Goal: make the query return <em>any</em> row. A true condition in SQL always returns rows."
-    ])}
+        "Authentication systems check credentials against a database. If the query structure itself can be manipulated, the check becomes meaningless.",
+        "Certain special characters have meaning inside SQL. If user input is placed directly into a query string, those characters don't stay as data.",
+        "The filter inspects the raw value before the server transforms it. Encoding the same data differently may let it pass the check while still reaching the query unchanged."
+    ], "hint1b")}
     """
     return page("Stage 01", body)
 
@@ -848,11 +887,9 @@ def level2():
         <hr class="divider">
         <p style="font-size:0.82rem; color:var(--text-dim);">Next target: find a hidden admin endpoint and send the correct identity header.</p>
         {hint_block([
-            "Web crawlers are told what <em>not</em> to index via a file at <code>/robots.txt</code> — check it.",
-            "The hidden endpoint requires a custom HTTP header. Normal browsers don't send custom headers automatically.",
-            "Use <code>curl</code> with the <code>-H</code> flag, or Burp Suite to add a custom request header.",
-            "Think about what header value would convince the server you have elevated privileges.",
-            "Try: <code>curl -H 'X-Role: admin' http://localhost:5000/admin_v5</code>"
+            "Web servers sometimes publish a file that tells crawlers which paths are off-limits. This file is a standard part of how the web works — and it's publicly readable.",
+            "Restricted paths listed in that file are meant to be hidden, but listing them makes them discoverable. Check what paths the server is trying to hide.",
+            "Servers can make decisions based on data in the request that isn't the URL or body. Some endpoints trust certain request metadata to determine who you are."
         ], "hint2")}
         """
         return page("Stage 02", body)
@@ -890,10 +927,9 @@ def admin_v5():
     <div class="alert alert-error">&#10006; Access denied. Your identity header is missing or incorrect.</div>
     <p style="font-size:0.82rem; color:var(--text-dim); margin-top:0.8rem;">Headers define identity. Send the right one.</p>
     {hint_block([
-        "The server checks a request header called <code>X-Role</code>.",
-        "Set its value to the role that grants admin access.",
-        "Use curl: <code>curl -H \"X-Role: admin\" http://&lt;host&gt;/admin_v5</code>",
-        "Or use Burp Suite's Repeater tab to manually add headers to any request."
+        "HTTP requests carry more than just a URL and a body. Headers are key-value pairs sent alongside the request — servers can read and act on any of them.",
+        "Some applications trust custom headers to determine a user's role or permission level without verifying them server-side. Think about what role would unlock this panel.",
+        "Tools like curl, Burp Suite, or browser extensions let you craft requests with any headers you choose — browsers alone won't let you set arbitrary headers normally."
     ], "hint-admin")}
     """
     return page("Stage 02", body)
@@ -943,11 +979,9 @@ def level3():
     </form>
     {output_html}
     {hint_block([
-        "The query is: <code>SELECT username FROM users WHERE username LIKE '%{keyword}%'</code>",
-        'The filter blocks input containing the string <code>admin</code> — but SQL can query <em>any</em> data without using the literal word.',
-        "Try injecting a <code>UNION SELECT</code> to pull data from another part of the query.",
-        "Alternatively, use a wildcard inside SQL: <code>%' UNION SELECT username FROM users WHERE role='admin'--</code>",
-        "The check for 'admin' in results runs server-side on the <em>output</em>, not your input."
+        "The search runs a SQL LIKE query. LIKE uses wildcard characters to match patterns — but what if SQL itself is restructured rather than using the pattern-matching alone?",
+        "The keyword filter blocks a specific string in your input, not in the database results. The server checks if <em>your input</em> contains that string — not the query output.",
+        "SQL supports combining two separate SELECT statements with a keyword that merges their result sets. If you can inject that structure, you control what data comes back."
     ], "hint3")}
     """
     return page("Stage 03", body)
@@ -967,11 +1001,12 @@ def hidden_area():
         <h1 class="card-title">Hidden Area Unlocked</h1>
         <div class="alert alert-success">Token accepted. Cookie / header value verified.</div>
         {flag_display(S4_FLAG)}
-        <p style="font-size:0.82rem; color:var(--text-dim); margin-top:1rem;">
-          Hint: Look for the hidden configuration endpoint for the final flag.
-          <!-- Look for /debug_config — it's easy. -->
+        <hr class="divider">
+        <p style="font-size:0.82rem; color:var(--text-dim);">
+          Stage 05 is the final challenge. Developers sometimes leave sensitive endpoints exposed — especially when debug mode is on. The path to the last flag is hidden somewhere in this page.
         </p>
-        {next_level_btn('/debug_config', 'Proceed to Stage 05')}
+        <!-- developer note: debug endpoint still live at /debug_config — remove before prod -->
+        {next_level_btn('/level5', 'Proceed to Stage 05')}
         """
         return page("Stage 04 — Solved", body)
 
@@ -984,11 +1019,9 @@ def hidden_area():
       It has already set a cookie on your browser — but is the value right?
     </p>
     {hint_block([
-        "Open DevTools → Application → Cookies. Check the value of the <code>access</code> cookie.",
-        "The server sets it to <code>denied</code> by default. You need it to say something else.",
-        "Edit the cookie value directly in DevTools, or use curl with <code>--cookie 'access=granted'</code>.",
-        "Alternatively, add the header <code>X-Access: granted</code> to your request.",
-        "Try: <code>curl -H 'X-Access: granted' http://&lt;host&gt;/hidden_area</code>"
+        "Browsers store small pieces of data sent by servers called cookies. The server can set a cookie, but the client stores it — and can modify it.",
+        "When a server sets a cookie, it's not locked. The stored value lives in your browser and can be inspected or changed using browser developer tools.",
+        "The server also accepts an alternative: a custom request header. Requests sent via tools outside the browser can carry headers that a normal page visit would never include."
     ], "hint4")}
     """))
     resp.set_cookie('access', 'denied')
@@ -999,16 +1032,42 @@ def hidden_area():
 # STAGE 5
 # =============================
 
+@app.route('/level5')
+def level5():
+    body = f"""
+    <div class="stage-badge"><span class="dot"></span> Stage 05 — Information Disclosure</div>
+    <h1 class="card-title">Final Stage</h1>
+    <p class="card-desc">
+      Developers build applications with debug tools that should never reach production. These endpoints expose secrets — configuration, keys, flags. Your job: find the one left open on this server.
+    </p>
+    <hr class="divider">
+    <div class="terminal">
+      &gt; target: this web application<br>
+      &gt; objective: locate exposed debug endpoint<br>
+      &gt; method: source inspection / path discovery<br>
+      &gt; status: <span style="color:var(--amber)">searching...</span>
+    </div>
+    {hint_block([
+        "Web pages are more than what you see rendered. Browsers receive full HTML source — developers sometimes leave notes in that source that are invisible on screen but readable in the code.",
+        "Every page you have visited so far has source code. Check the HTML of the page that sent you here — developers often leave comments about things they forgot to clean up.",
+        "Debug and configuration endpoints are often named with words like 'debug', 'config', 'test', or 'admin'. The note left in the previous page's source points directly to the path."
+    ], "hint5")}
+    """
+    return page("Stage 05", body)
+
+
 @app.route('/debug_config')
 def debug_config():
     body = f"""
     <div class="stage-badge"><span class="dot"></span> Stage 05 — Complete</div>
     <h1 class="card-title">Debug Config Exposed</h1>
-    <div class="alert alert-success">Information disclosure vulnerability triggered. Debug endpoint left exposed in production.</div>
+    <div class="alert alert-success">Information disclosure vulnerability triggered. Debug endpoint left live in production.</div>
     <div class="terminal">
-      SECRET_KEY = {app.secret_key}<br>
-      ENVIRONMENT = production<br>
-      DEBUG = True
+      &gt; /debug_config accessed<br>
+      &gt; SECRET_KEY = {app.secret_key}<br>
+      &gt; ENVIRONMENT = production<br>
+      &gt; DEBUG = True<br>
+      &gt; <span style="color:var(--red)">WARNING: this endpoint should be disabled in production</span>
     </div>
     {flag_display(S5_FLAG)}
     <div class="next-banner">
