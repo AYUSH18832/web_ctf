@@ -737,7 +737,6 @@ def rules():
     <div class="rules-section">
       <h3>// Challenge Rules</h3>
       <ul class="rules-list">
-        <li>Each stage must be solved in order. Proceed via the provided links after capturing a flag.</li>
         <li>You are permitted to use browser DevTools, curl, Burp Suite, and similar tools.</li>
         <li>Do not brute-force the server or launch DoS attacks.</li>
         <li>Do not share flags or solutions with other participants during the event.</li>
@@ -823,7 +822,7 @@ def login():
             <form method="POST">
               <div class="field-group">
                 <label class="field-label">Username</label>
-                <input type="text" name="username" placeholder="enter username" autocomplete="off">
+                <input type="text" name="username" placeholder="enter username{{user}}" autocomplete="off">
               </div>
               <div class="field-group">
                 <label class="field-label">Password</label>
@@ -845,7 +844,7 @@ def login():
     <div class="stage-badge"><span class="dot"></span> Stage 01 — Auth Bypass</div>
     <h1 class="card-title">Authentication</h1>
     <p class="card-desc">
-      A login form stands between you and the flag. The server filters some characters — but filtering isn't sanitization. Find a way in.
+      A login form stands between you and the flag. The server filters some characters — but filtering isn't sanitization. Find a way in. Login as user
     </p>
     <form method="POST">
       <div class="field-group">
