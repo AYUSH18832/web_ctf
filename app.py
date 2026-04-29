@@ -905,7 +905,7 @@ def level2():
 
 @app.route('/robots.txt')
 def robots():
-    return """User-agent: *\nDisallow: /admin_v5\n# try custom header"""
+    return """User-agent: *\nDisallow: /admin_v5\n# Manually set X-Role header\nUser-agent: *\nDisallow: /debug_config\n# debug endpoint, source may hold clues""", 200, {'Content-Type': 'text/plain'}
 
 
 @app.route('/admin_v5')
